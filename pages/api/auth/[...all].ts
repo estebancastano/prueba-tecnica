@@ -1,7 +1,59 @@
-import { toNodeHandler } from 'better-auth/node';
-import { auth } from '@/lib/auth';
+import type { NextApiRequest, NextApiResponse } from "next";
+import { auth } from "@/lib/auth";
 
-// Disallow body parsing, we will parse it manually
-export const config = { api: { bodyParser: false } };
+export default async function handler(
+    req: NextApiRequest,
+    res: NextApiResponse
+) {
+    try {
+        const protocol = req.headers["x-forwarded-proto"] || "http";
+        const host = req.headers.host || "localhost:3000";
+        const fullUrl = `${protocol}://${host}${req.url}`;
 
-export default toNodeHandler(auth.handler);
+        console.log("📍 Full URL:", fullUrl);
+
+        const headers = new Headers();
+        Object.entries(req.headers).forEach(([key, value]) => {
+            if (value) {
+                headers.set(key, Array.isArray(value) ? value[0] : value);
+            }
+        });
+
+        let body = undefined;
+        if (req.method !== "GET" && req.method !== "HEAD") {
+            body = JSON.stringify(req.body);
+        }
+
+        const request = new Request(fullUrl, {
+            method: req.method,
+            headers,
+            body,
+        });
+
+        const response = await auth.handler(request);
+        const responseBody = await response.text();
+
+        response.headers.forEach((value, key) => {
+            res.setHeader(key, value);
+        });
+
+        res.status(response.status);
+
+        if (responseBody) {
+            try {
+                const json = JSON.parse(responseBody);
+                res.json(json); // ✅ sin return
+            } catch {
+                res.send(responseBody); // ✅ sin return
+            }
+        } else {
+            res.end(); // ✅ sin return
+        }
+    } catch (error) {
+        console.error("❌ Auth handler error:", error);
+        res.status(500).json({
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+        });
+    }
+}
