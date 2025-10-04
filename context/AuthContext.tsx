@@ -17,13 +17,21 @@ const AuthContext = createContext<AuthContextType>({ user: null, setUser: () => 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
 
-    // Se hace esto para traer el usuario autenticado al cargar la app
     useEffect(() => {
-        fetch("/api/auth/me") 
-            .then(res => res.json())
-            .then(data => setUser(data.user))
+        const baseUrl =
+            typeof window !== "undefined"
+                ? window.location.origin
+                : process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000";
+
+        fetch(`${baseUrl}/api/auth/me`)
+            .then(async (res) => {
+                if (!res.ok) throw new Error("No autenticado");
+                const data = await res.json();
+                setUser(data.user || null);
+            })
             .catch(() => setUser(null));
     }, []);
+
 
     return <AuthContext.Provider value={{ user, setUser }}>{children}</AuthContext.Provider>;
 };
