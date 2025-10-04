@@ -103,11 +103,11 @@ export default function Reports() {
             "\uFEFF" + // ← 📌 BOM para compatibilidad con Excel y caracteres especiales
             [
                 ["Fecha", "Monto", "Concepto", "Usuario"],
-                ...data.movimientos.map((m) => [
+                ...data.movimientos.map((m: Movimiento) => [
                     m.fecha.split("T")[0],
                     m.monto,
                     m.concepto,
-                    m.usuario.name,
+                    m.usuario?.name || "Desconocido",
                 ]),
             ]
                 .map((row) => row.join(","))
