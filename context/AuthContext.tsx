@@ -17,9 +17,9 @@ const AuthContext = createContext<AuthContextType>({ user: null, setUser: () => 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
 
-    // Opcional: traer usuario del backend cuando se monta la app
+    // Se hace esto para traer el usuario autenticado al cargar la app
     useEffect(() => {
-        fetch("/api/auth/me") // endpoint que devuelve info del usuario logueado
+        fetch("/api/auth/me") 
             .then(res => res.json())
             .then(data => setUser(data.user))
             .catch(() => setUser(null));

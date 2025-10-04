@@ -1,4 +1,3 @@
-// pages/api/auth/me.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import { withAuth } from "@/lib/authMiddleware";
 

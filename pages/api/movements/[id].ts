@@ -4,7 +4,7 @@ import { withAuth } from "@/lib/authMiddleware";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
     const user = (req as any).user;
-    const { id } = req.query; // id viene de la URL /movimientos/:id
+    const { id } = req.query; 
 
     if (!user) return res.status(401).json({ message: "No autorizado. Usuario no encontrado." });
 
@@ -45,8 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             data: {
                 concepto,
                 monto,
-                fecha: new Date(fecha),
-                tipo,
+                fecha: new Date(fecha)
             },
         });
 
