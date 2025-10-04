@@ -1,17 +1,19 @@
+// lib/auth-client.ts
 import { createAuthClient } from "better-auth/react";
 
-const getBaseUrl = () => {
+const getAuthBase = () => {
+  // navegador (cliente): usa el origin real
   if (typeof window !== "undefined") {
-    // 📌 En el navegador → usa la URL del dominio actual (funciona local y en Vercel)
     return `${window.location.origin}/api/auth`;
   }
 
-  // 📌 En SSR/Node → usa la variable de entorno si existe
-  return `${process.env.NEXT_PUBLIC_AUTH_URL || "http://localhost:3000"}/api/auth`;
+  // SSR / Node: usa la env si existe (origin, sin /api)
+  const origin = process.env.NEXT_PUBLIC_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  return `${origin.replace(/\/$/, "")}/api/auth`;
 };
 
 export const authClient = createAuthClient({
-  baseURL: getBaseUrl(),
+  baseURL: getAuthBase(),
 });
 
 export const { signIn, signOut, useSession } = authClient;
