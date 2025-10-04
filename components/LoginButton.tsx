@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const baseUrl = process.env.NEXT_PUBLIC_AUTH_URL;
 
     return (
         <main className="p-4">
