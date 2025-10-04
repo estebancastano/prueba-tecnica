@@ -1,4 +1,3 @@
-// lib/withAuth.ts
 import type { NextApiRequest, NextApiResponse, NextApiHandler } from "next";
 import prisma from "@/lib/prisma";
 

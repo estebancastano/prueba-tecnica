@@ -42,12 +42,12 @@ export default async function handler(
         if (responseBody) {
             try {
                 const json = JSON.parse(responseBody);
-                res.json(json); // ✅ sin return
+                res.json(json); 
             } catch {
-                res.send(responseBody); // ✅ sin return
+                res.send(responseBody); 
             }
         } else {
-            res.end(); // ✅ sin return
+            res.end(); 
         }
     } catch (error) {
         console.error("❌ Auth handler error:", error);

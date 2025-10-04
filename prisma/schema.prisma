@@ -69,15 +69,10 @@ model Movimiento {
   concepto String
   monto    Float
   fecha    DateTime       @default(now())
-  tipo     TipoMovimiento
   userId   String
   usuario  User           @relation(fields: [userId], references: [id])
 }
 
-enum TipoMovimiento {
-  INGRESO
-  EGRESO
-}
 
 enum Role {
   ADMIN

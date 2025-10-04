@@ -13,7 +13,7 @@ export function withAuth(
             const token = req.cookies["better-auth.session_token"];
             if (!token) return res.status(401).json({ message: "No autorizado. No hay token." });
 
-            // 1️⃣ Obtener sesión desde BetterAuth
+            // Obtener sesión desde BetterAuth
             const sessionResult = await auth.api.getSession({
                 headers: { cookie: `better-auth.session_token=${token}` },
             });
@@ -25,10 +25,10 @@ export function withAuth(
                 return res.status(401).json({ message: "No autorizado. Sesión inválida." });
             }
 
-            // 2️⃣ Upsert: crear usuario automáticamente si no existe
+            // Upsert: crear usuario automáticamente si no existe
             const user = await prisma.user.upsert({
                 where: { id: userFromSession.id },
-                update: {}, // si ya existe, no hacemos nada
+                update: {}, // si ya existe, no se hace nada
                 create: {
                     id: userFromSession.id,
                     name: userFromSession.name || "Sin nombre",
@@ -40,12 +40,12 @@ export function withAuth(
                 },
             });
 
-            // 3️⃣ Verificar rol
+            //  Verificar rol
             if (rolesRequired && !rolesRequired.includes(user.role as any)) {
                 return res.status(403).json({ message: "No autorizado. Rol insuficiente." });
             }
 
-            // 4️⃣ Adjuntar usuario a la request
+            //  Adjuntar usuario a la request
             (req as any).user = user;
 
             return handler(req, res);
