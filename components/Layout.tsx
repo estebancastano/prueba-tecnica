@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
@@ -33,29 +33,45 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
     const { user, setUser } = useAuth();
     const router = useRouter();
-    const [open, setOpen] = useState(false); // estado del modal
+    const [open, setOpen] = useState(false);
 
     const handleLogout = async () => {
         try {
             await authClient.signOut();
             setUser(null);
-            setOpen(true); // abrir modal después de cerrar sesión
+            setOpen(true); 
         } catch (err) {
             console.error("Error al cerrar sesión:", err);
         }
     };
 
+    const redirectLogin = () => {
+        setOpen(false);
+        router.push("/login");
+    };
+
+    const logoutGithub = () => {
+        window.open("https://github.com/logout", "_blank", "noopener,noreferrer");
+        redirectLogin();
+    };
+
+    useEffect(() => {
+        if (user && !user.phone) {
+            router.replace("/complete-profile");
+        }
+    }, [user, router]);
+
     return (
         <SidebarProvider>
             <div className="flex h-screen">
-                {/* 🧭 Sidebar */}
+                {/* Sidebar */}
                 <Sidebar className="sidebar-theme border-r">
                     <SidebarContent>
                         <SidebarHeader className="flex items-center justify-center py-6">
                             <Link href="/dashboard" passHref>
                                 <Image
                                     src="/logo.png"
-                                    alt="Logo del sistema"
+                                    alt="Logo"
                                     width={140}
                                     height={50}
                                     priority
@@ -100,52 +116,36 @@ export function Layout({ children }: LayoutProps) {
                             </span>
 
                             {user && (
-                                <Button
-                                    variant="destructive"
-                                    className="w-full"
-                                    onClick={handleLogout}
-                                >
-                                    <LogOut />
-                                    Cerrar Sesión
+                                <Button variant="destructive" className="w-full" onClick={handleLogout}>
+                                    <LogOut /> Cerrar Sesión
                                 </Button>
                             )}
                         </SidebarFooter>
                     </SidebarContent>
                 </Sidebar>
 
-                {/* 📄 Contenido principal */}
-                <main className="flex-1 overflow-auto bg-background p-6">
-                    {children}
-                </main>
+                {/* Contenido principal */}
+                <main className="flex-1 overflow-auto bg-background p-6">{children}</main>
 
-                {/* 🔐 Modal de sesión cerrada */}
-                <Dialog open={open} onOpenChange={setOpen}>
+                {/* Modal sesión cerrada */}
+                <Dialog
+                    open={open}
+                    modal
+                    onOpenChange={setOpen} // X o clic fuera solo cierran modal
+                >
                     <DialogContent className="max-w-sm text-center">
                         <DialogHeader>
                             <DialogTitle className="text-xl">🔐 Sesión cerrada</DialogTitle>
                             <DialogDescription className="text-gray-600 mt-2">
-                                Has cerrado sesión en la aplicación correctamente.
-                                Si deseas iniciar sesión con otra cuenta de <strong>GitHub</strong>,
-                                cierra sesión también en GitHub o abre esta página en modo incógnito.
+                                Has cerrado sesión correctamente.
+                                <br />
+                                Si deseas iniciar sesión con otra cuenta de <strong>GitHub</strong>, cierra sesión allí también.
                             </DialogDescription>
                         </DialogHeader>
 
                         <DialogFooter className="flex justify-center gap-3 mt-4">
-                            <Button asChild variant="outline">
-                                <a
-                                    href="https://github.com/logout"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Cerrar sesión en GitHub
-                                </a>
-                            </Button>
-                            <Button onClick={() => {
-                                setOpen(false);
-                                router.push("/login"); // redirige al login al cerrar el modal
-                            }}>
-                                Entendido
-                            </Button>
+                            <Button onClick={logoutGithub} variant="outline">Cerrar sesión en GitHub</Button>
+                            <Button onClick={redirectLogin}>Entendido</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

@@ -1,5 +1,6 @@
 // pages/index.tsx
 "use client";
+import { useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
@@ -8,6 +9,11 @@ import { useAuth } from "@/context/AuthContext"; // ← importa el contexto
 export default function Home() {
     const router = useRouter();
     const { user } = useAuth(); // ← obtiene el usuario actual
+    useEffect(() => {
+        if (user?.id) {
+            router.replace("/dashboard"); 
+        }
+    }, [user, router]);
 
     return (
         <Layout>
@@ -27,7 +33,7 @@ export default function Home() {
                         Sistema de gestión de ingresos y gastos
                     </Button>
 
-                    {/* ✅ Estos dos solo aparecen si el rol es ADMIN */}
+                    {/* Estos dos solo aparecen si el rol es ADMIN */}
                     {user?.role === "ADMIN" && (
                         <>
                             <Button

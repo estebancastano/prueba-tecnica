@@ -1,4 +1,3 @@
-// componente cliente (por ejemplo pages/index.tsx)
 "use client";
 import { Button } from "@/components/ui/button";
 

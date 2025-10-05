@@ -4,14 +4,15 @@ import { withAuth } from "@/lib/authMiddleware";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { id } = req.query;
-    if (!id || typeof id !== "string") return res.status(400).json({ message: "Id inválido." });
+    if (!id || typeof id !== "string")
+        return res.status(400).json({ message: "Id inválido." });
 
-    // 🔹 PUT - actualizar nombre y rol
+    // 🔹 PUT - actualizar nombre, rol o teléfono
     if (req.method === "PUT") {
-        const { name, role } = req.body;
+        const { name, role, phone } = req.body;
 
-        if (!name || !role) {
-            return res.status(400).json({ message: "Faltan campos obligatorios: name y role." });
+        if (!name && !role && !phone) {
+            return res.status(400).json({ message: "Debes enviar al menos un campo a actualizar." });
         }
 
         const usuario = await prisma.user.findUnique({ where: { id } });
@@ -20,7 +21,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         try {
             const actualizado = await prisma.user.update({
                 where: { id },
-                data: { name, role },
+                data: {
+                    ...(name && { name }),
+                    ...(role && { role }),
+                    ...(phone && { phone }),
+                },
             });
             return res.json(actualizado);
         } catch (error) {

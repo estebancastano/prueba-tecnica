@@ -1,7 +1,7 @@
-// /pages/api/docs.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import swaggerJsdoc from "swagger-jsdoc";
 
+// Configuración de Swagger para la documentación de la API
 const options = {
     definition: {
         openapi: "3.0.0",
@@ -14,6 +14,7 @@ const options = {
             { url: "http://localhost:3000/api", description: "Servidor local" },
         ],
         components: {
+            // 🔹 Esquemas de datos para Movimientos y Usuarios
             schemas: {
                 Movimiento: {
                     type: "object",
@@ -42,6 +43,7 @@ const options = {
                 },
             },
         },
+        // 🔹 Rutas de Movimientos, Usuarios y Reportes
         paths: {
             "/movements": {
                 get: {

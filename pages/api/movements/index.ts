@@ -1,35 +1,31 @@
-// pages/api/movimientos/index.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "@/lib/prisma";
 import { withAuth } from "@/lib/authMiddleware";
 
+// Endpoint CRUD de movimientos con autenticación y control de roles
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-    const user = (req as any).user;
+    const user = (req as any).user; // Usuario autenticado
 
     if (!user) return res.status(401).json({ message: "No autorizado. Usuario no encontrado." });
 
+    // 🔹 GET - Obtener movimientos
     if (req.method === "GET") {
         const all = req.query.all === "true";
 
-        // 🗓️ Rango de fechas
+        //  Definir rango de fechas por defecto (últimos 30 días)
         const fechaInicio = req.query.fechaInicio
             ? new Date(req.query.fechaInicio as string)
             : new Date(new Date().setDate(new Date().getDate() - 30));
-        fechaInicio.setHours(0, 0, 0, 0); // inicio del día
+        fechaInicio.setHours(0, 0, 0, 0);
 
         const fechaFin = req.query.fechaFin
             ? new Date(req.query.fechaFin as string)
             : new Date();
-        fechaFin.setHours(23, 59, 59, 999); // fin del día
+        fechaFin.setHours(23, 59, 59, 999);
 
-        const filtroFechas = {
-            fecha: {
-                gte: fechaInicio,
-                lte: fechaFin,
-            },
-        };
+        const filtroFechas = { fecha: { gte: fechaInicio, lte: fechaFin } };
 
-        // ✅ Si piden todos los movimientos (sin paginación)
+        //  Todos los movimientos (sin paginación)
         if (all) {
             const movimientos = await prisma.movimiento.findMany({
                 where: filtroFechas,
@@ -37,7 +33,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
                 orderBy: { fecha: "asc" },
             });
 
-            // 💰 Calcular total global también aquí
+            // Calcular total global
             const totalGlobalResult = await prisma.movimiento.aggregate({
                 _sum: { monto: true },
                 where: filtroFechas,
@@ -47,7 +43,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             return res.json({ movimientos, totalGlobal });
         }
 
-        // 📄 Modo paginado normal
+        // 📄 Paginación
         const page = Number(req.query.page) || 1;
         const limit = Number(req.query.limit) || 6;
         const skip = (page - 1) * limit;
@@ -72,6 +68,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res.json({ movimientos, total, totalGlobal });
     }
 
+    // 🔹 POST - Crear nuevo movimiento
     if (req.method === "POST") {
         const { concepto, monto, fecha } = req.body;
 
@@ -91,7 +88,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res.status(201).json(nuevoMovimiento);
     }
 
+    // ❌ Método no permitido
     res.status(405).json({ message: "Método no permitido" });
 }
 
+// Exportar handler protegido con roles USUARIO y ADMIN
 export default withAuth(handler, ["USUARIO", "ADMIN"]);

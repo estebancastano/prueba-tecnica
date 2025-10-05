@@ -31,18 +31,13 @@ export default function Reports() {
     const [saldo, setSaldo] = useState(0);
 
     useEffect(() => {
-        if (user) fetchMovimientos();
+        if (user) fetchMovimientosGrafico();
     }, [user]);
 
-    const fetchMovimientos = async () => {
+    // Fetch para el gráfico
+    const fetchMovimientosGrafico = async () => {
         try {
-            const fechaFin = new Date();
-            const fechaInicio = new Date();
-            fechaInicio.setDate(fechaFin.getDate() - 30);
-
-            const res = await fetch(
-                `/api/movements?fechaInicio=${fechaInicio.toISOString()}&fechaFin=${fechaFin.toISOString()}`
-            );
+            const res = await fetch("/api/movements?all=true"); // sin paginación
             const data = await res.json();
 
             const movimientosArray: Movimiento[] = Array.isArray(data)
@@ -51,7 +46,7 @@ export default function Reports() {
 
             setMovimientos(movimientosArray);
 
-            // 💰 Calcular saldo total
+            //  Calcular saldo total
             const total = movimientosArray.reduce(
                 (acc, mov) => acc + Number(mov.monto),
                 0
@@ -62,7 +57,7 @@ export default function Reports() {
         }
     };
 
-    // 📊 Crear mapa con los últimos 30 días
+    // Crear mapa con los últimos 30 días
     const generarRangoFechas = () => {
         const fechas: Record<string, number> = {};
         const hoy = new Date();
@@ -75,7 +70,7 @@ export default function Reports() {
         return fechas;
     };
 
-    // 📊 Agrupar montos por fecha usando formato UTC estable
+    // Agrupar montos por fecha
     const chartData = (() => {
         const mapaFechas = generarRangoFechas();
         movimientos.forEach((mov) => {
@@ -91,16 +86,17 @@ export default function Reports() {
         }));
     })();
 
-    // 📈 Promedio diario
+
+    // Promedio diario
     const promedioDiario = chartData.length ? saldo / chartData.length : 0;
 
-    // 📥 Descargar CSV con nombre del usuario y todos los registros
+    // Descargar CSV con nombre del usuario y todos los registros
     const handleDownloadCSV = async () => {
         const res = await fetch("/api/movements?all=true");
         const data = await res.json();
 
         const csvContent =
-            "\uFEFF" + // ← 📌 BOM para compatibilidad con Excel y caracteres especiales
+            "\uFEFF" + // ←  BOM para compatibilidad con Excel y caracteres especiales
             [
                 ["Fecha", "Monto", "Concepto", "Usuario"],
                 ...data.movimientos.map((m: Movimiento) => [
@@ -132,7 +128,7 @@ export default function Reports() {
                 <h2 className="text-2xl font-bold mb-4"> Reportes de Movimientos</h2>
             </div>
 
-            {/* 💰 Saldo actual y botón de descarga */}
+            {/* Saldo actual y botón de descarga */}
             <div className="mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div>
                     <p className="text-lg font-semibold">
@@ -156,37 +152,44 @@ export default function Reports() {
                 </div>
 
                 <Button onClick={handleDownloadCSV} className="px-6">
-                    <FileDown  /> Descargar CSV
+                    <FileDown /> Descargar CSV
                 </Button>
             </div>
 
-            {/* 📈 Gráfico */}
-            <div className="bg-white shadow-md rounded-lg p-4">
-                <ResponsiveContainer width="100%" height={350}>
-                    <BarChart
-                        data={chartData}
-                        margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-                    >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="fecha" angle={-45} textAnchor="end" height={70} />
-                        <YAxis />
-                        <Tooltip
-                            formatter={(value: number) =>
-                                value.toLocaleString("es-CO", {
-                                    style: "currency",
-                                    currency: "COP",
-                                })
-                            }
-                        />
-                        <Bar
-                            dataKey="monto"
-                            fill="#4F46E5"
-                            barSize={15}
-                            radius={[4, 4, 0, 0]}
-                        />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
+            {/* Gráfico */}
+            <ResponsiveContainer width="100%" height={350}>
+                <BarChart
+                    data={chartData}
+                    margin={{ top: 10, right: 50, left: 50, bottom: 10 }}
+                    barCategoryGap="10%" 
+                >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="fecha" angle={-45} textAnchor="end" height={70} />
+                    <YAxis
+                        domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.1)]}
+                        tickCount={6}
+                        tickFormatter={(value: number) =>
+                            value.toLocaleString("es-CO", { style: "currency", currency: "COP" })
+                        }
+                    />
+
+                    <Tooltip
+                        formatter={(value: number) =>
+                            value.toLocaleString("es-CO", {
+                                style: "currency",
+                                currency: "COP",
+                            })
+                        }
+                    />
+                    <Bar
+                        dataKey="monto"
+                        fill="#4F46E5"
+                        barSize={50} 
+                        radius={[6, 6, 0, 0]} 
+                    />
+                </BarChart>
+            </ResponsiveContainer>
+
         </Layout>
     );
 }

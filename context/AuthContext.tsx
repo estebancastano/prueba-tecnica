@@ -1,7 +1,6 @@
-// context/AuthContext.tsx
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 
-type User = { id: string; name: string; email: string; role: "ADMIN" | "USUARIO" };
+export type User = { id: string; name: string; phone?: string; email: string; role: "ADMIN" | "USUARIO" };
 
 type AuthContextType = { user: User | null; setUser: (u: User | null) => void };
 
@@ -17,7 +16,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 : process.env.NEXT_PUBLIC_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
         fetch(`${baseOrigin}/api/auth/me`, {
-            credentials: "include", // <- MUY IMPORTANTE
+            credentials: "include", 
         })
             .then(async (res) => {
                 if (!res.ok) throw new Error("No autenticado");
