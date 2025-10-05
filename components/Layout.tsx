@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +17,15 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
 import { LogOut, Wallet, Users, FileText } from "lucide-react";
 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from "@/components/ui/dialog";
+
 interface LayoutProps {
     children: ReactNode;
 }
@@ -24,20 +33,13 @@ interface LayoutProps {
 export function Layout({ children }: LayoutProps) {
     const { user, setUser } = useAuth();
     const router = useRouter();
+    const [open, setOpen] = useState(false); // estado del modal
 
     const handleLogout = async () => {
         try {
             await authClient.signOut();
             setUser(null);
-
-            // limpiar cookies
-            document.cookie.split(";").forEach((c) => {
-                document.cookie = c
-                    .replace(/^ +/, "")
-                    .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
-            });
-
-            router.push("/login");
+            setOpen(true); // abrir modal después de cerrar sesión
         } catch (err) {
             console.error("Error al cerrar sesión:", err);
         }
@@ -65,7 +67,9 @@ export function Layout({ children }: LayoutProps) {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <Link href="/movements" passHref>
-                                    <SidebarMenuButton><Wallet className="mr-2 text-lg"/> Ingresos y egresos</SidebarMenuButton>
+                                    <SidebarMenuButton>
+                                        <Wallet className="mr-2 text-lg" /> Ingresos y egresos
+                                    </SidebarMenuButton>
                                 </Link>
                             </SidebarMenuItem>
 
@@ -73,13 +77,17 @@ export function Layout({ children }: LayoutProps) {
                                 <>
                                     <SidebarMenuItem>
                                         <Link href="/users" passHref>
-                                            <SidebarMenuButton><Users className="mr-2"/> Usuarios</SidebarMenuButton>
+                                            <SidebarMenuButton>
+                                                <Users className="mr-2" /> Usuarios
+                                            </SidebarMenuButton>
                                         </Link>
                                     </SidebarMenuItem>
 
                                     <SidebarMenuItem>
                                         <Link href="/reports" passHref>
-                                            <SidebarMenuButton><FileText className="mr-2"/> Reportes</SidebarMenuButton>
+                                            <SidebarMenuButton>
+                                                <FileText className="mr-2" /> Reportes
+                                            </SidebarMenuButton>
                                         </Link>
                                     </SidebarMenuItem>
                                 </>
@@ -109,6 +117,38 @@ export function Layout({ children }: LayoutProps) {
                 <main className="flex-1 overflow-auto bg-background p-6">
                     {children}
                 </main>
+
+                {/* 🔐 Modal de sesión cerrada */}
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogContent className="max-w-sm text-center">
+                        <DialogHeader>
+                            <DialogTitle className="text-xl">🔐 Sesión cerrada</DialogTitle>
+                            <DialogDescription className="text-gray-600 mt-2">
+                                Has cerrado sesión en la aplicación correctamente.
+                                Si deseas iniciar sesión con otra cuenta de <strong>GitHub</strong>,
+                                cierra sesión también en GitHub o abre esta página en modo incógnito.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <DialogFooter className="flex justify-center gap-3 mt-4">
+                            <Button asChild variant="outline">
+                                <a
+                                    href="https://github.com/logout"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Cerrar sesión en GitHub
+                                </a>
+                            </Button>
+                            <Button onClick={() => {
+                                setOpen(false);
+                                router.push("/login"); // redirige al login al cerrar el modal
+                            }}>
+                                Entendido
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </SidebarProvider>
     );
