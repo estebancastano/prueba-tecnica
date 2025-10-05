@@ -1,4 +1,3 @@
-// __tests__/movements.test.ts
 import { createMocks } from 'node-mocks-http';
 import handler from '../movements/index';
 import { NextApiRequest, NextApiResponse } from 'next';

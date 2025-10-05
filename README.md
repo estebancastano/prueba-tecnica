@@ -1,117 +1,139 @@
-## Prueba Técnica para Desarrollador Fullstack
+# Sistema Financiero - Gestión de Movimientos, Usuarios y Reportes
 
-### Introducción
+Este proyecto es un sistema web desarrollado con **Next.js**, **TypeScript**, **Tailwind CSS**, **shadcn/ui**, y **Prisma** como ORM, utilizando **Supabase (PostgreSQL)** como base de datos.  
 
-El objetivo de esta prueba técnica es evaluar tus habilidades en el desarrollo de una aplicación fullstack. Deberás implementar un sistema de gestión de ingresos y egresos, la gestión de usuarios y la generación de reportes. El proyecto cuenta con [wireframes](<https://www.figma.com/design/2PINjveveJJ9ZAAwxwNoRK/Wireframes-(Copy)?node-id=0-1&t=6q0Q0id8YnjH9fJt-1>) que pueden servir de guía para el candidato. Sin embargo, el diseño de la interfaz de usuario es libre.
+El sistema permite gestionar ingresos y egresos, usuarios, y generar reportes con gráficos y CSV. Se implementa autenticación con **Better Auth** y control de roles (RBAC).
 
-### Requisitos del Proyecto
+---
 
-#### Funcionalidades Principales
+##  Tecnologías utilizadas
 
-1. **Roles y Permisos**
-   - **Roles:**
-     - **Usuario:** Solo puede acceder a la gestión de movimientos.
-     - **Administrador:** Puede ver los reportes, editar usuarios y agregar movimientos.
-   - **Nota:** Para efectos de prueba, todos los nuevos usuarios deben ser automáticamente asignados con el rol "ADMIN".
+- **Frontend:** Next.js, TypeScript, Tailwind CSS, shadcn/ui, Recharts
+- **Backend / API:** Next.js API Routes, Prisma ORM
+- **Base de datos:** Supabase (PostgreSQL)
+- **Autenticación:** Better Auth (GitHub OAuth)
+- **Testing:** Jest
 
-2. **Home**
-   - Página de inicio con un menú principal que permite la navegación a tres secciones:
-     - Sistema de gestión de ingresos y gastos (disponible para todos los roles)
-     - Gestión de usuarios (solo para administradores)
-     - Reportes (solo para administradores)
+---
 
-3. **Sistema de Gestión de Ingresos y Gastos**
-   - **Vista de Ingresos y Egresos**
-     - Implementar una tabla que muestre los ingresos y egresos registrados con las siguientes columnas:
-       - Concepto
-       - Monto
-       - Fecha
-       - Usuario
-     - Botón "Nuevo" para agregar un nuevo ingreso o egreso (solo para administradores).
-   - **Formulario de Nuevo Ingreso/Egreso**
-     - Formulario con los campos:
-       - Monto
-       - Concepto
-       - Fecha
-     - Botón para guardar el nuevo movimiento.
+##  Instalación y ejecución local
 
-4. **Gestión de Usuarios** (solo para administradores)
-   - **Vista de Usuarios**
-     - Tabla que muestre la lista de usuarios con las siguientes columnas:
-       - Nombre
-       - Correo
-       - Teléfono
-       - Acciones (editar usuario)
-   - **Formulario de Edición de Usuario**
-     - Formulario con los campos:
-       - Nombre
-       - Rol
-     - Botón para guardar los cambios.
+1. Clonar el repositorio:
 
-5. **Reportes** (solo para administradores)
-   - Mostrar un gráfico de movimientos financieros.
-   - Mostrar el saldo actual.
-   - Botón para descargar el reporte en formato CSV.
+```bash
+git clone https://github.com/estebancastano/prueba-tecnica.git
+cd prueba-tecnica
+``` 
+2. Instalar dependencias:
 
-### Requisitos Técnicos
+```bash
+npm install
+```
+3. Ejecutar migraciones de Prisma:
 
-- **Tecnologías y Herramientas:**
-  - **Frontend:**
-    - Next.js utilizando `pages` router.
-    - TypeScript.
-    - Tailwind CSS.
-    - Shadcn para componentes de la interfaz de usuario.
-    - NextJS API routes para comunicación con el backend.
-  - **Backend:**
-    - NextJS API routes para implementar endpoints REST.
-    - Base de datos de Postgres en Supabase.
-     - **Documentación de API:** Implementar una ruta `/api/docs` que exponga la documentación del API usando OpenAPI/Swagger. Cada endpoint creado debe estar completamente documentado con sus parámetros, respuestas y ejemplos.
-   - **Protección de Datos:**
-     - Implementar control de acceso basado en roles (RBAC) para asegurar que solo los usuarios autorizados puedan acceder a ciertas funcionalidades y datos.
-     - Proteger el backend para que rechace conexiones no autenticadas.
-   - **Autenticación:**
-     - Utilizar [Better Auth](https://www.better-auth.com/) con [GitHub](https://github.com/settings/developers) como proveedor de autenticación y [Prisma](https://prisma.io) como adaptador para la autenticación por sesiones de base de datos.
-     - **IMPORTANTE:** Todos los nuevos usuarios que se registren deben ser automáticamente asignados con el rol "ADMIN" para facilitar las pruebas de la aplicación.
-   - **Pruebas unitarias**  - El candidato debe agregar al menos 3 pruebas unitarias donde considere necesario.
-  - **Despliegue:**
-    - Desplegar el proyecto en Vercel.
+```bash
+npx prisma migrate dev --name init
+```
+4. Levantar el proyecto en modo desarrollo:
 
-### Entregables
+```bash
+npm run dev
+```
+El proyecto estará disponible en http://localhost:3000.
 
-1. **Código Fuente:**
-   - Repositorio en GitHub con el código fuente del proyecto.
-   - Incluir un archivo README con instrucciones claras sobre cómo ejecutar el proyecto localmente y cómo desplegarlo en Vercel.
+---
 
-2. **Despliegue:**
-   - Proyecto desplegado en Vercel con la URL proporcionada.
+## Pruebas
 
-### Criterios de Evaluación
+Para ejecutar pruebas unitarias con Jest:
 
-- **Funcionalidad:**
-  - Cumplimiento de todos los requisitos funcionales.
-  - Correcta implementación del CRUD para ingresos, egresos y usuarios.
-  - Generación y descarga de reportes en formato CSV.
+```bash
+npx jest
+```
+---
+##  Funcionalidades
+- Gestión de movimientos
 
-- **Calidad del Código:**
-  - Calidad y claridad del código.
-  - Uso adecuado de las mejores prácticas de desarrollo.
-  - Estructura del proyecto.
-  - Documentación completa de la API con OpenAPI/Swagger.
+- Listado de ingresos y egresos
 
-- **Diseño y UX:**
-  - Usabilidad de la interfaz.
-  - Implementación de un diseño atractivo.
+- Crear movimientos
 
-- **Pruebas y Documentación:**
-  - Cobertura de pruebas unitarias.
-  - Calidad de los comentarios dentro del proyecto.
+- Cálculo automático del saldo actual
 
-- **Seguridad:**
-  - Implementación efectiva de control de acceso basado en roles (RBAC).
-  - Protección adecuada de los datos sensibles.
+### Gestión de usuarios (solo admin)
 
-- **Notas**:
-  - El aplicativo no debe contener diseño responsivo.
-  - El candidato puede utilizar el código cargado en este repositorio. Sin embargo, esta no es una condición necesaria y el candidato puede iniciar el proyecto de 0 si lo desea.
-  - El candidato puede cambiar las versiones de las librerías si lo considera necesario.
-  - El candidato debe compartir el acceso al repositorio de GitHub y el .env a los correos mlopera@prevalentware.com, jdsanchez@prevalentware.com y dfsorza@prevalentware.com
+- Listado de usuarios
+
+- Editar usuarios
+
+- Asignación de roles (ADMIN o USUARIO)
+
+### Reportes
+
+- Gráficos de movimientos usando Recharts
+
+- Descarga de reportes en CSV
+
+### Autenticación y roles
+
+- Inicio de sesión con GitHub
+
+- Redirección a completar perfil si faltan datos (como teléfono)
+ 
+- Control de acceso por roles (RBAC)
+
+---
+
+## Despliegue en Vercel desde el repositorio
+
+1. **Conectar el repositorio en Vercel**  
+   - Ingresa a [https://vercel.com](https://vercel.com) y haz clic en **New Project → Import Git Repository**.  
+   - Selecciona tu repositorio de GitHub donde está el proyecto.
+
+2. **Configurar variables de entorno**  
+   - Ve a **Settings → Environment Variables**.  
+   - Agrega las mismas variables que tienes en local:  
+     ```
+     DATABASE_URL=postgresql://<usuario>:<password>@<host>:<puerto>/<db>
+     NEXT_PUBLIC_APP_URL=https://<tu-dominio>.vercel.app
+     NEXT_PUBLIC_AUTH_URL=https://<tu-dominio>.vercel.app
+     GITHUB_CLIENT_ID=<tu_client_id>
+     GITHUB_CLIENT_SECRET=<tu_client_secret>
+     ```
+
+3. **Deploy automático**  
+   - Cada vez que hagas **push** a la rama principal (`main` o `master`), Vercel construirá y desplegará automáticamente el proyecto.
+
+4. **Acceder a la app**  
+   - Una vez desplegado, tu proyecto estará disponible en:  
+     ```
+     https://tudominio.vercel.app
+     ```
+
+
+
+
+El despliegue quedó en la siguiente url: 
+https://prueba-fullstack-esteban.vercel.app
+
+---
+
+## Notas adicionales
+
+- Se priorizó la funcionalidad y seguridad sobre el diseño.
+
+- Los nombres de rutas y variables siguen un estándar consistente.
+
+---
+
+## Registro de desarrollo
+
+Día 1: Estructura inicial, Next.js + TypeScript + Tailwind + Prisma ✅
+
+Día 2: Backend / API, CRUD de usuarios y movimientos, RBAC ✅
+
+Día 3: Frontend movimientos, tablas y formularios ✅
+
+Día 4: Gestión de usuarios y reportes ✅
+
+Día 5: Pruebas con Jest, ajustes finales y documentación ✅

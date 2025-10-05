@@ -26,7 +26,7 @@ type Movimiento = {
     id: number;
     concepto: string;
     monto: number;
-    fecha: string; // guardamos como string YYYY-MM-DD
+    fecha: string;
     usuario: {
         name: string;
     };

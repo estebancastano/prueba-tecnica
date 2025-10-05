@@ -4,24 +4,23 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// Middleware para proteger rutas API con autenticación y roles
 export function withAuth(
     handler: NextApiHandler,
     rolesRequired: Array<"ADMIN" | "USUARIO"> = ["ADMIN"]
 ) {
     return async (req: NextApiRequest, res: NextApiResponse) => {
         try {
-            // ✅ Buscar dinámicamente la cookie de sesión (local o producción)
+            // Buscar la cookie de sesión de Better Auth
             const cookieName = Object.keys(req.cookies).find((key) =>
                 key.includes("better-auth.session_token")
             );
 
             const token = cookieName ? req.cookies[cookieName] : null;
 
-            if (!token) {
-                return res.status(401).json({ message: "No autorizado. No hay token." });
-            }
+            if (!token) return res.status(401).json({ message: "No autorizado. No hay token." });
 
-            // ✅ Obtener sesión desde BetterAuth usando el nombre real de la cookie
+            // Validar sesión con Better Auth
             const sessionResult = await auth.api.getSession({
                 headers: { cookie: `${cookieName}=${token}` },
             });
@@ -29,33 +28,32 @@ export function withAuth(
             const session = sessionResult?.session;
             const userFromSession = sessionResult?.user;
 
-            if (!session || !userFromSession) {
+            if (!session || !userFromSession)
                 return res.status(401).json({ message: "No autorizado. Sesión inválida." });
-            }
 
-            // 🛠️ Crear o actualizar usuario en DB
+            // Crear o actualizar usuario en la base de datos
             const user = await prisma.user.upsert({
                 where: { id: userFromSession.id },
-                update: {}, // si ya existe, no se actualiza nada por ahora
+                update: {}, // No se actualizan campos automáticamente
                 create: {
                     id: userFromSession.id,
                     name: userFromSession.name || "Sin nombre",
                     email: userFromSession.email!,
-                    role: "ADMIN", // 👈 rol por defecto
+                    role: "ADMIN", // Rol por defecto
                     emailVerified: userFromSession.emailVerified || false,
                     phone: null,
                     image: userFromSession.image || null,
                 },
             });
 
-            // 🔐 Verificar rol si se requiere
-            if (rolesRequired && !rolesRequired.includes(user.role as any)) {
+            // Verificar rol permitido
+            if (rolesRequired && !rolesRequired.includes(user.role as any))
                 return res.status(403).json({ message: "No autorizado. Rol insuficiente." });
-            }
 
-            // 📌 Adjuntar usuario a la request
+            // Adjuntar usuario a la request
             (req as any).user = user;
 
+            // Ejecutar el handler original
             return handler(req, res);
         } catch (error) {
             console.error("❌ Error en withAuth:", error);
