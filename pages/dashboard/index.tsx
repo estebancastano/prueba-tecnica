@@ -1,10 +1,13 @@
 // pages/index.tsx
+"use client";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
+import { useAuth } from "@/context/AuthContext"; // ← importa el contexto
 
 export default function Home() {
     const router = useRouter();
+    const { user } = useAuth(); // ← obtiene el usuario actual
 
     return (
         <Layout>
@@ -24,23 +27,26 @@ export default function Home() {
                         Sistema de gestión de ingresos y gastos
                     </Button>
 
-                    {/* Botón Usuarios */}
-                    <Button
-                        onClick={() => router.push("/users")}
-                        className="h-32 text-lg font-semibold shadow-lg rounded-2xl transition-transform hover:scale-105"
-                        variant="secondary"
-                    >
-                        Sistema de gestión de usuarios
-                    </Button>
+                    {/* ✅ Estos dos solo aparecen si el rol es ADMIN */}
+                    {user?.role === "ADMIN" && (
+                        <>
+                            <Button
+                                onClick={() => router.push("/users")}
+                                className="h-32 text-lg font-semibold shadow-lg rounded-2xl transition-transform hover:scale-105"
+                                variant="secondary"
+                            >
+                                Sistema de gestión de usuarios
+                            </Button>
 
-                    {/* Botón Reportes */}
-                    <Button
-                        onClick={() => router.push("/reports")}
-                        className="h-32 text-lg font-semibold shadow-lg rounded-2xl transition-transform hover:scale-105"
-                        variant="secondary"
-                    >
-                        Reportes
-                    </Button>
+                            <Button
+                                onClick={() => router.push("/reports")}
+                                className="h-32 text-lg font-semibold shadow-lg rounded-2xl transition-transform hover:scale-105"
+                                variant="secondary"
+                            >
+                                Reportes
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
         </Layout>
