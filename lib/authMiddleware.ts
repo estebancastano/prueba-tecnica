@@ -10,12 +10,20 @@ export function withAuth(
 ) {
     return async (req: NextApiRequest, res: NextApiResponse) => {
         try {
-            const token = req.cookies["better-auth.session_token"];
-            if (!token) return res.status(401).json({ message: "No autorizado. No hay token." });
+            // ✅ Buscar dinámicamente la cookie de sesión (local o producción)
+            const cookieName = Object.keys(req.cookies).find((key) =>
+                key.includes("better-auth.session_token")
+            );
 
-            // Obtener sesión desde BetterAuth
+            const token = cookieName ? req.cookies[cookieName] : null;
+
+            if (!token) {
+                return res.status(401).json({ message: "No autorizado. No hay token." });
+            }
+
+            // ✅ Obtener sesión desde BetterAuth usando el nombre real de la cookie
             const sessionResult = await auth.api.getSession({
-                headers: { cookie: `better-auth.session_token=${token}` },
+                headers: { cookie: `${cookieName}=${token}` },
             });
 
             const session = sessionResult?.session;
@@ -25,35 +33,33 @@ export function withAuth(
                 return res.status(401).json({ message: "No autorizado. Sesión inválida." });
             }
 
-            // Upsert: crear usuario automáticamente si no existe
+            // 🛠️ Crear o actualizar usuario en DB
             const user = await prisma.user.upsert({
                 where: { id: userFromSession.id },
-                update: {}, // si ya existe, no se hace nada
+                update: {}, // si ya existe, no se actualiza nada por ahora
                 create: {
                     id: userFromSession.id,
                     name: userFromSession.name || "Sin nombre",
                     email: userFromSession.email!,
-                    role: "ADMIN",           // <-- rol por defecto
+                    role: "ADMIN", // 👈 rol por defecto
                     emailVerified: userFromSession.emailVerified || false,
                     phone: null,
                     image: userFromSession.image || null,
                 },
             });
 
-            //  Verificar rol
+            // 🔐 Verificar rol si se requiere
             if (rolesRequired && !rolesRequired.includes(user.role as any)) {
                 return res.status(403).json({ message: "No autorizado. Rol insuficiente." });
             }
 
-            //  Adjuntar usuario a la request
+            // 📌 Adjuntar usuario a la request
             (req as any).user = user;
 
             return handler(req, res);
-
         } catch (error) {
             console.error("❌ Error en withAuth:", error);
             return res.status(500).json({ message: "Error interno en autenticación" });
         }
     };
 }
-
