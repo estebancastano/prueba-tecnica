@@ -43,14 +43,54 @@ El proyecto estará disponible en http://localhost:3000.
 
 ---
 
-## Pruebas
 
-Para ejecutar pruebas unitarias con Jest:
 
-```bash
-npx jest
-```
+## Autenticación con GitHub (OAuth)
+
+Este proyecto utiliza Better Auth para autenticación mediante GitHub. Para que funcione correctamente, necesitas:
+
+- Crear una OAuth App en GitHub:
+ 
+- Ir a GitHub Developer Settings → OAuth Apps
+
+- Hacer clic en New OAuth App
+
+### Configurar:
+
+- Application name: Nombre de tu proyecto
+
+- Homepage URL: http://localhost:3000 (en desarrollo)
+
+- Authorization callback URL: http://localhost:3000/api/auth/callback/github
+
+- Guardar y copiar Client ID y Client Secret
+
+- Configurar variables de entorno en tu proyecto:
+
+``` 
+GITHUB_CLIENT_ID=tu_client_id
+GITHUB_CLIENT_SECRET=tu_client_secret
+NEXT_PUBLIC_AUTH_URL=http://localhost:3000
+``` 
+
+En Vercel, agregar las mismas variables de entorno para que la app desplegada también funcione.
+
+🔹 Nota: Si el usuario inicia sesión con GitHub y no tiene teléfono registrado, la aplicación redirige automáticamente a /complete-profile para completar el perfil.
+
+--- 
+
+## Documentación de la API (OpenAPI/Swagger)
+
+Toda la documentación de la API se encuentra disponible en la ruta:
+
+
+http://localhost:3000/docs
+
+
+Allí podrás consultar los endpoints de movimientos, usuarios y reportes, incluyendo ejemplos y estructuras de request/response.
+
 ---
+
 ##  Funcionalidades
 - Gestión de movimientos
 
@@ -82,6 +122,14 @@ npx jest
  
 - Control de acceso por roles (RBAC)
 
+---
+## Pruebas
+
+Para ejecutar pruebas unitarias con Jest:
+
+```bash
+npx jest
+```
 ---
 
 ## Despliegue en Vercel desde el repositorio
