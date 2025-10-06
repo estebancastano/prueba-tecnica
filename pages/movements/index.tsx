@@ -38,6 +38,7 @@ export default function Movimientos() {
     const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
     const [total, setTotal] = useState(0);
     const [totalGlobal, setTotalGlobal] = useState(0);
+    const [montoError, setMontoError] = useState("");
     const [page, setPage] = useState(1);
     const limit = 5;
 
@@ -144,7 +145,7 @@ export default function Movimientos() {
                         disabled={page === 1}
                         size="sm"
                     >
-                        <ArrowLeft/>
+                        <ArrowLeft />
                         Anterior
                     </Button>
 
@@ -178,7 +179,24 @@ export default function Movimientos() {
 
                         <div className="grid gap-1">
                             <Label htmlFor="monto">Monto</Label>
-                            <Input id="monto" name="monto" type="number" value={form.monto} onChange={handleChange} />
+                            <Input id="monto" name="monto" type="number" min="0" value={form.monto} onChange={(e) => {
+                                const value = e.target.value;
+
+                                if (value === "") {
+                                    setMontoError("⚠️ El monto es obligatorio");
+                                    setForm({ ...form, monto: 0 });
+                                } else if (!/^\d*\.?\d*$/.test(value)) {
+                                    setMontoError("⚠️ Solo se permiten números");
+                                } else if (Number(value) < 0) {
+                                    setMontoError("⚠️ El monto no puede ser negativo");
+                                } else {
+                                    setMontoError(""); // ✅ sin error
+                                    setForm({ ...form, monto: Number(value) });
+                                }
+                            }} />
+                            {montoError && (
+                                <p className="text-red-500 text-sm mt-1">{montoError}</p>
+                            )}
                         </div>
 
                         <div className="grid gap-1">
